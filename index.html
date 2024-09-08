@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>21</title>
+    <header>TWENTY ONE</header>
+    <link rel="stylesheet" type="text/css" href="index.css">
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <div id="gameOver"></div>
+    <button id="buttonOne">1</button><button id="buttonTwo">2</button><button id="buttonThree">3</button>
+    <button id="restartButton">Restart</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      let index = 1;
+      const messages = document.getElementById('messages');
+      const buttonOne = document.getElementById('buttonOne');
+      const buttonTwo = document.getElementById('buttonTwo');
+      const buttonThree = document.getElementById('buttonThree');
+      const restartButton = document.getElementById('restartButton');
+      const gameOver = document.getElementById('gameOver');
+
+      restartButton.addEventListener('click', (e) => {
+        socket.emit('restart');
+      });
+
+      // Button 1 Click Event
+      buttonOne.addEventListener('click', (e) => {
+          socket.emit('chat message', [index, index +1]);
+          if (index == 19) {
+            buttonOne.innerHTML = index + 1;
+            buttonTwo.innerHTML = index + 2;
+            buttonThree.innerHTML = "-"; 
+          } else if (index == 20) {
+            buttonOne.innerHTML = index + 1;
+            buttonTwo.innerHTML = "-";
+            buttonThree.innerHTML = "-";
+          } else if (index >= 21) {
+            gameOver.innerHTML = "Game over. You lost!";
+          } else { 
+            buttonOne.innerHTML = index + 1;
+            buttonTwo.innerHTML = index + 2;
+            buttonThree.innerHTML = index + 3;
+          }
+          index++;
+          buttonOne.disabled = true;
+          buttonTwo.disabled = true;
+          buttonThree.disabled = true;
+      });
+
+      // Button 2 Click Event
+      buttonTwo.addEventListener('click', (e) => {
+        socket.emit('chat message', [index , index + 1, index + 2]);
+        if (index == 18) {
+            buttonOne.innerHTML = index + 2;
+            buttonTwo.innerHTML = index + 3;
+            buttonThree.innerHTML = "-";
+        } else if (index == 19) {
+            buttonOne.innerHTML = index + 2;
+            buttonTwo.innerHTML = "-";
+            buttonThree.innerHTML = "-"; 
+          } else if (index >= 20) {
+            gameOver.innerHTML = "Game over. You lost!";
+          } else {
+            buttonOne.innerHTML = index + 2;
+            buttonTwo.innerHTML = index + 3;
+            buttonThree.innerHTML = index + 4;
+          }
+        index += 2;
+        buttonOne.disabled = true;
+        buttonTwo.disabled = true;
+        buttonThree.disabled = true;
+      });
+
+      // Button 3 Click Event
+      buttonThree.addEventListener('click', (e) => {
+        socket.emit('chat message', [index ,index + 1, index + 2, index + 3]);
+        if (index == 17) {
+          buttonOne.innerHTML = index + 3;
+          buttonTwo.innerHTML = index + 4;
+          buttonThree.innerHTML = "-"; 
+        } else if (index == 18) {
+          buttonOne.innerHTML = index + 3;
+          buttonTwo.innerHTML = "-";
+          buttonThree.innerHTML = "-";
+        } else if (index >= 19) {
+          gameOver.innerHTML = "Game over. You lost!";
+        } else  {
+          buttonOne.innerHTML = index + 3;
+          buttonTwo.innerHTML = index + 4;
+          buttonThree.innerHTML = index + 5;
+        }
+        buttonOne.disabled = true;
+        buttonTwo.disabled = true;
+        buttonThree.disabled = true;
+        index += 3;
+      });
+
+      // Receiving messages and appending them to the list
+      socket.on('chat message', (msg) => {
+        const item = document.createElement('li');
+        item.textContent = msg.slice(0, -1).join(", ");
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+
+        index = msg[msg.length - 1];
+          if (index == 20) {
+            buttonOne.innerHTML = index;
+            buttonTwo.innerHTML = index + 1;
+            buttonThree.innerHTML = "-";
+          } else if (index == 21) { 
+            buttonOne.innerHTML = index;
+            buttonTwo.innerHTML = "-";
+            buttonThree.innerHTML = "-";
+          } else {
+            buttonOne.innerHTML = index;
+            buttonTwo.innerHTML = index + 1;
+            buttonThree.innerHTML = index + 2;
+          }
+      });
+
+      socket.on('toggle button', () => {
+        if (buttonOne.innerHTML != "-") {
+          buttonOne.disabled = false;
+        }
+        if (buttonTwo.innerHTML != "-") {
+          buttonTwo.disabled = false;
+        }
+        if (buttonThree.innerHTML != "-") {
+          buttonThree.disabled = false;
+        }
+      });
+
+      socket.on('winMessage', () => {
+        buttonOne.disabled = true;
+        buttonTwo.disabled = true;
+        buttonThree.disabled = true;
+        gameOver.innerHTML = "Game over. You won!";
+      });
+
+      socket.on('restart', () => {
+        buttonOne.disabled = false;
+        buttonTwo.disabled = false;
+        buttonThree.disabled = false;
+
+        index = 1;
+        buttonOne.innerHTML = index;
+        buttonTwo.innerHTML = index + 1;
+        buttonThree.innerHTML = index + 2;
+
+        messages.innerHTML = "";
+        gameOver.innerHTML = "";
+      })
+
+    </script>
+  </body>
+</html>
+
+<!-- 1. make it pretty
+      2. make rooms 
+      3. turn it into a multiplayer game? -->
